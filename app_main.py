@@ -6,6 +6,8 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.label import Label
 from kivy.uix.button import Button
 
+from src.progress_bar_custom import ProgressBarCustom
+
 
 class AppMainLayout(BoxLayout):
     def __init__(self, **kwargs):
@@ -16,23 +18,36 @@ class AppMainLayout(BoxLayout):
 
         self.label = Label(
             text="AppMainLayout",
-            size_hint=(1, 0.5)
+            size_hint=(1, 0.33)
         )
         self.add_widget(self.label)
 
         self.test_button = Button(
-            text="test button",
-            size_hint=(1, 0.5),
+            # text="test button",
+            text="click to increase progress",
+            size_hint=(1, 0.33),
             on_release=lambda button_instance: \
                 self.handle_test_button_click(button_instance)
         )
         self.add_widget(self.test_button)
+
+        self.progress_bar_container = BoxLayout(
+            size_hint=(1, 0.33)
+        )
+        self.add_widget(self.progress_bar_container)
+
+        self.progress_bar_custom = ProgressBarCustom(size_hint=(1, 1))
+        self.progress_bar_container.add_widget(self.progress_bar_custom)
+        # self.progress_bar_custom.set_percent_complete(70)
     # *************************************************************
     # end: AppMainLayout.__init__()
     # *************************************************************
     def handle_test_button_click(self, button_instance):
         self.button_click_count += 1
-        print("The test button was clicked {} times".format(self.button_click_count))
+        if self.button_click_count > 4:
+            self.button_click_count = 0
+        self.progress_bar_custom.set_percent_complete(self.button_click_count * 25)
+        # print("The test button was clicked {} times".format(self.button_click_count))
 # *************************************************************
 # end: class AppMainLayout
 # *************************************************************

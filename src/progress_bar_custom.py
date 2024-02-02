@@ -3,7 +3,11 @@ from kivy.graphics import Rectangle
 from kivy.graphics import Color
 from kivy.uix.anchorlayout import AnchorLayout
 from kivy.uix.label import Label
+from .utils import rgba_to_color
 
+PB_BACKGROUND_COLOR = rgba_to_color((33, 33, 33, 255))
+PB_COLOR = rgba_to_color((0, 200, 81, 255))
+# PB_COLOR = rgba_to_color((255, 136, 0, 255))
 
 class ProgressBarCustom(Widget):
     def __init__(self, **kwargs):
@@ -33,9 +37,21 @@ class ProgressBarCustom(Widget):
     def update_canvas(self, *args):
         with self.canvas.before:
             if self.parent:
-                Color(33/255, 33/255, 33/255, 1, mode="rgba")
+                Color(
+                    PB_BACKGROUND_COLOR[0], # R
+                    PB_BACKGROUND_COLOR[1], # G
+                    PB_BACKGROUND_COLOR[2], # B
+                    PB_BACKGROUND_COLOR[3], # A
+                    mode="rgba"
+                )
                 Rectangle(pos=(0, 0), size=(self.parent.size[0], self.parent.size[1]))
-                Color(0, 200/255, 81/255, 1, mode="rgba")
+                Color(
+                    PB_COLOR[0], # R
+                    PB_COLOR[1], # G
+                    PB_COLOR[2], # B
+                    PB_COLOR[3], # A
+                    mode="rgba"
+                )
                 Rectangle(
                     pos=(0, 0),
                     size=(

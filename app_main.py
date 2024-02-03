@@ -7,6 +7,7 @@ from kivy.uix.label import Label
 from kivy.uix.button import Button
 
 from src.progress_bar_custom import ProgressBarCustom
+from src.tabbed_panel_main import TabbedPanelMain
 
 
 class AppMainLayout(BoxLayout):
@@ -20,7 +21,7 @@ class AppMainLayout(BoxLayout):
             text="AppMainLayout",
             size_hint=(1, 0.33)
         )
-        self.add_widget(self.label)
+        # self.add_widget(self.label)
 
         self.test_button = Button(
             # text="test button",
@@ -29,10 +30,18 @@ class AppMainLayout(BoxLayout):
             on_release=lambda button_instance: \
                 self.handle_test_button_click(button_instance)
         )
-        self.add_widget(self.test_button)
+        # self.add_widget(self.test_button)
+
+        self.main_tabbed_panel = TabbedPanelMain(size_hint=(1, 0.9))
+        self.add_widget(self.main_tabbed_panel)
+
+        self.main_tabbed_panel.get_demo_tab_callbacks() \
+            ["increase_progress_button_click_cb"] = \
+            lambda: self.handle_test_button_click(None)
+
 
         self.progress_bar_container = BoxLayout(
-            size_hint=(1, 0.33)
+            size_hint=(1, 0.1)
         )
         self.add_widget(self.progress_bar_container)
 

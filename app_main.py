@@ -39,6 +39,10 @@ class AppMainLayout(BoxLayout):
             ["increase_progress_button_click_cb"] = \
             lambda: self.handle_test_button_click(None)
 
+        self.main_tabbed_panel.get_demo_tab_callbacks() \
+            ["progress_slider_value_change_cb"] = \
+            lambda new_value: self.set_progress_bar_value(new_value)
+
 
         self.progress_bar_container = BoxLayout(
             size_hint=(1, 0.1)
@@ -57,6 +61,9 @@ class AppMainLayout(BoxLayout):
             self.button_click_count = 0
         self.progress_bar_custom.set_percent_complete(self.button_click_count * 25)
         # print("The test button was clicked {} times".format(self.button_click_count))
+
+    def set_progress_bar_value(self, new_value):
+        self.progress_bar_custom.set_percent_complete(new_value)
 # *************************************************************
 # end: class AppMainLayout
 # *************************************************************

@@ -91,6 +91,12 @@ class DemoTab(TabbedPanelItem):
                 self.handle_increase_progress_button_click(btn_instance)
         )
         # self.main_container.add_widget(self.increase_progress_with_button_submenu)
+        
+        self.increase_progress_with_slider_submenu = IncreaseProgressWithSliderSubmenu(
+            on_return_click=lambda btn_instance: self.return_from_submenu(),
+            on_slider_change=lambda value: \
+                self.handle_slider_value_change(None, value)
+        )
     # *************************************************************
     # end: DemoTab.__init__()
     # *************************************************************
@@ -99,7 +105,8 @@ class DemoTab(TabbedPanelItem):
             self.main_container.clear_widgets()
             self.main_container.add_widget(self.increase_progress_with_button_submenu)
         elif submenu_enum == ActiveSubmenuEnum.INCREASE_PROGRESS_WITH_SLIDER:
-            print("Not implemented yet")
+            self.main_container.clear_widgets()
+            self.main_container.add_widget(self.increase_progress_with_slider_submenu)
 
 
     def return_from_submenu(self):
@@ -165,6 +172,48 @@ class IncreaseProgressWithButtonSubmenu(BoxLayout):
             self.on_progress_btn_click(button_instance)
 # *************************************************************
 # end: class IncreaseProgressWithButtonSubmenu
+# *************************************************************
+
+
+class IncreaseProgressWithSliderSubmenu(BoxLayout):
+    def __init__(self, on_return_click=None, on_slider_change=None, **kwargs):
+        super(IncreaseProgressWithSliderSubmenu, self).__init__(**kwargs)
+        self.orientation = "vertical"
+
+        self.on_return_click = on_return_click
+        self.on_slider_change = on_slider_change
+
+        self.add_widget(SubmenuHeader(
+            "Demo - Increase Progress With Slider",
+            lambda btn_instance: self.handle_submenu_return_btn_click(btn_instance),
+            size_hint=(1, 0.10))
+        )
+
+        self.slider_container = AnchorLayout(
+            anchor_x="center",
+            anchor_y="center",
+            size_hint=(1, 0.9)
+        )
+        self.add_widget(self.slider_container)
+
+        self.progress_slider = Slider(
+            size=(400, 50),
+            size_hint=(None, None)
+        )
+        self.progress_slider.bind(value=self.handle_slider_value_change)
+        self.slider_container.add_widget(self.progress_slider)
+    # *************************************************************
+    # end: IncreaseProgressWithSliderSubmenu.__init__()
+    # *************************************************************
+    def handle_submenu_return_btn_click(self, button_instance):
+        if self.on_return_click and callable(self.on_return_click):
+            self.on_return_click(button_instance)
+
+    def handle_slider_value_change(self, instance, value):
+        if self.on_slider_change and callable(self.on_slider_change):
+            self.on_slider_change(value)
+# *************************************************************
+# end: class IncreaseProgressWithSliderSubmenu
 # *************************************************************
 
 

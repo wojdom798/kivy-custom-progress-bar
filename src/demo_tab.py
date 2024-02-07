@@ -17,6 +17,7 @@ class ActiveSubmenuEnum(Enum):
     NONE = "NONE"
     INCREASE_PROGRESS_WITH_BUTTON = "INCREASE_PROGRESS_WITH_BUTTON"
     INCREASE_PROGRESS_WITH_SLIDER = "INCREASE_PROGRESS_WITH_SLIDER"
+    COMPARISON_SIMULATION = "COMPARISON_SIMULATION"
 
 
 class DemoTab(TabbedPanelItem):
@@ -26,7 +27,8 @@ class DemoTab(TabbedPanelItem):
 
         self.callbacks = {
             "increase_progress_button_click_cb": None,
-            "progress_slider_value_change_cb": None
+            "progress_slider_value_change_cb": None,
+            "start_simulation_cb": None,
         }
 
         # self.main_container = AnchorLayout(
@@ -59,7 +61,7 @@ class DemoTab(TabbedPanelItem):
             orientation="vertical",
             size_hint=(1, 1),
             padding=(200, 70),
-            spacing=70
+            spacing=40
         )
         self.main_container.add_widget(self.submenu_button_container)
 
@@ -85,6 +87,17 @@ class DemoTab(TabbedPanelItem):
             self.increase_progress_with_slider_menu_button
         )
 
+        self.comparison_simulation_menu_button = Button(
+            text="Comparison Simulation (submenu)",
+            size_hint=(1, 1),
+            on_release=lambda btn_instance: self.show_submenu(
+                ActiveSubmenuEnum.COMPARISON_SIMULATION
+            )
+        )
+        self.submenu_button_container.add_widget(
+            self.comparison_simulation_menu_button
+        )
+
         self.increase_progress_with_button_submenu = IncreaseProgressWithButtonSubmenu(
             on_return_click=lambda btn_instance: self.return_from_submenu(),
             on_progress_btn_click=lambda btn_instance: \
@@ -97,6 +110,11 @@ class DemoTab(TabbedPanelItem):
             on_slider_change=lambda value: \
                 self.handle_slider_value_change(None, value)
         )
+        
+        self.comparison_simulation_submenu = ComparisonSimulationSubmenu(
+            on_return_click=lambda btn_instance: self.return_from_submenu(),
+            on_start_simulation_click=self.handle_start_simulation
+        )
     # *************************************************************
     # end: DemoTab.__init__()
     # *************************************************************
@@ -107,6 +125,9 @@ class DemoTab(TabbedPanelItem):
         elif submenu_enum == ActiveSubmenuEnum.INCREASE_PROGRESS_WITH_SLIDER:
             self.main_container.clear_widgets()
             self.main_container.add_widget(self.increase_progress_with_slider_submenu)
+        elif submenu_enum == ActiveSubmenuEnum.COMPARISON_SIMULATION:
+            self.main_container.clear_widgets()
+            self.main_container.add_widget(self.comparison_simulation_submenu)
 
 
     def return_from_submenu(self):
@@ -122,6 +143,11 @@ class DemoTab(TabbedPanelItem):
     def handle_slider_value_change(self, instance, value):
         if "progress_slider_value_change_cb" in self.callbacks:
             self.callbacks["progress_slider_value_change_cb"](value)
+
+    
+    def handle_start_simulation(self):
+        if "start_simulation_cb" in self.callbacks:
+            self.callbacks["start_simulation_cb"]()
 
 
     def get_callbacks(self):
@@ -214,6 +240,51 @@ class IncreaseProgressWithSliderSubmenu(BoxLayout):
             self.on_slider_change(value)
 # *************************************************************
 # end: class IncreaseProgressWithSliderSubmenu
+# *************************************************************
+
+
+class ComparisonSimulationSubmenu(BoxLayout):
+    def __init__(self, on_return_click=None, on_start_simulation_click=None, **kwargs):
+        super(ComparisonSimulationSubmenu, self).__init__(**kwargs)
+        self.orientation = "vertical"
+
+        self.on_return_click = on_return_click
+        self.on_start_simulation_click = on_start_simulation_click
+
+        self.add_widget(SubmenuHeader(
+            "Demo - Comparison Simulation",
+            lambda btn_instance: self.handle_submenu_return_btn_click(btn_instance),
+            size_hint=(1, 0.10))
+        )
+
+        self.main_container = AnchorLayout(
+            anchor_x="center",
+            anchor_y="center",
+            size_hint=(1, 0.9)
+        )
+        self.add_widget(self.main_container)
+
+        self.start_simulation_button = Button(
+            text="start simulation",
+            size=(400, 50),
+            size_hint=(None, None),
+            on_release=lambda btn_instance: \
+                self.handle_start_simulation_btn_click(btn_instance)
+        )
+        self.main_container.add_widget(self.start_simulation_button)
+    # *************************************************************
+    # end: ComparisonSimulationSubmenu.__init__()
+    # *************************************************************
+    def handle_submenu_return_btn_click(self, button_instance):
+        if self.on_return_click and callable(self.on_return_click):
+            self.on_return_click(button_instance)
+
+
+    def handle_start_simulation_btn_click(self, button_instance):
+        if self.on_start_simulation_click and callable(self.on_start_simulation_click):
+            self.on_start_simulation_click()
+# *************************************************************
+# end: class ComparisonSimulationSubmenu
 # *************************************************************
 
 

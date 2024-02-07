@@ -43,6 +43,9 @@ class AppMainLayout(BoxLayout):
             ["progress_slider_value_change_cb"] = \
             lambda new_value: self.set_progress_bar_value(new_value)
 
+        self.main_tabbed_panel.get_demo_tab_callbacks() \
+            ["start_simulation_cb"] = lambda: self.run_comparison_simulation()
+
 
         self.progress_bar_container = BoxLayout(
             size_hint=(1, 0.1)
@@ -64,6 +67,9 @@ class AppMainLayout(BoxLayout):
 
     def set_progress_bar_value(self, new_value):
         self.progress_bar_custom.set_percent_complete(new_value)
+
+    def run_comparison_simulation(self):
+        print("starting comparison simulation...")
 # *************************************************************
 # end: class AppMainLayout
 # *************************************************************

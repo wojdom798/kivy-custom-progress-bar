@@ -1,3 +1,7 @@
+import threading
+import time
+from kivy.clock import mainthread as kivy_mainthread
+
 from kivy.app import App
 from kivy.core.window import Window as KivyWindow
 
@@ -65,11 +69,69 @@ class AppMainLayout(BoxLayout):
         self.progress_bar_custom.set_percent_complete(self.button_click_count * 25)
         # print("The test button was clicked {} times".format(self.button_click_count))
 
+
     def set_progress_bar_value(self, new_value):
         self.progress_bar_custom.set_percent_complete(new_value)
 
+
     def run_comparison_simulation(self):
-        print("starting comparison simulation...")
+        NUM_OF_ITEMS_TO_COMPARE = 10000
+        REFRESH_RATE_MS = 70
+
+        comparison_simulation_thread = threading.Thread(
+            target=self.simulate_comparisons,
+            args=(
+                NUM_OF_ITEMS_TO_COMPARE,
+                lambda update_data: self.update_progressbar_threaded(update_data),
+                REFRESH_RATE_MS
+            )
+        )
+        comparison_simulation_thread.start()
+
+
+    @kivy_mainthread
+    def update_progressbar_threaded(self, update_data):
+        percent_complete = \
+            (update_data["current_progress"] / update_data["total_progress"]) * 100
+        self.progress_bar_custom.set_percent_complete(percent_complete)
+
+
+    def simulate_comparisons(self, num_of_items, on_progress_update, refresh_rate_ms=120):
+        if not (type(num_of_items) == int):
+            raise TypeError("\'num_of_items\' must be an integer.")
+
+        if num_of_items < 2:
+            raise ValueError("\'num_of_items\' must be greater than 2.")
+
+        if not callable(on_progress_update):
+            raise TypeError("\'on_progress_update\' must be a function reference.")
+
+        if not (type(refresh_rate_ms) == int):
+            raise TypeError("\'refresh_rate_ms\' must be an integer.")
+
+        if refresh_rate_ms <= 0:
+            raise ValueError("\'refresh_rate_ms\' must be greater than 0.")
+
+        # n = num_of_items - 1
+        # total_progress = ((1 + n) / 2) * n
+        current_progress = 0
+        total_progress = ((num_of_items) / 2) * (num_of_items - 1)
+        
+        previous_update_timestamp = time.time() * 1000 # milliseconds
+        for i in range(0, num_of_items):
+            for j in range(i+1, num_of_items):
+                current_progress += 1
+                timestamp_now = time.time() * 1000 # milliseconds
+                if timestamp_now - previous_update_timestamp >= refresh_rate_ms:
+                    previous_update_timestamp = timestamp_now
+                    on_progress_update({
+                        "current_progress": current_progress,
+                        "total_progress": total_progress
+                    })
+        on_progress_update({
+            "current_progress": current_progress,
+            "total_progress": total_progress
+        })
 # *************************************************************
 # end: class AppMainLayout
 # *************************************************************

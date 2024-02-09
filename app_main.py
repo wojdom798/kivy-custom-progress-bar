@@ -21,6 +21,9 @@ class AppMainLayout(BoxLayout):
 
         self.button_click_count = 0
 
+        self.comparison_simulation_thread = None
+        self.is_comparison_simulation_active = False
+
         self.label = Label(
             text="AppMainLayout",
             size_hint=(1, 0.33)
@@ -78,15 +81,39 @@ class AppMainLayout(BoxLayout):
         NUM_OF_ITEMS_TO_COMPARE = 10000
         REFRESH_RATE_MS = 70
 
-        comparison_simulation_thread = threading.Thread(
-            target=self.simulate_comparisons,
-            args=(
-                NUM_OF_ITEMS_TO_COMPARE,
-                lambda update_data: self.update_progressbar_threaded(update_data),
-                REFRESH_RATE_MS
+        if not self.is_comparison_simulation_active:
+            print("starting the simulation...")
+            self.is_comparison_simulation_active = True
+            # TODO: deactivate the button
+
+            self.comparison_simulation_thread = threading.Thread(
+                target=self.simulate_comparisons,
+                args=(
+                    NUM_OF_ITEMS_TO_COMPARE,
+                    lambda update_data: self.update_progressbar_threaded(update_data),
+                    REFRESH_RATE_MS
+                )
             )
-        )
-        comparison_simulation_thread.start()
+            self.comparison_simulation_thread.start()
+            
+            sim_check_thread = threading.Thread(
+                target=self.check_comparison_simulation_finished
+            )
+            sim_check_thread.start()
+        
+    
+    def check_comparison_simulation_finished(self):
+        while (self.comparison_simulation_thread.is_alive()):
+            time.sleep(0.1) # 100 ms
+        print("comparison finished.")
+        self.perform_comparison_simulation_cleanup()
+
+
+    @kivy_mainthread
+    def perform_comparison_simulation_cleanup(self):
+        print("cleaning up...")
+        self.is_comparison_simulation_active = False
+        # TODO: activate the button
 
 
     @kivy_mainthread

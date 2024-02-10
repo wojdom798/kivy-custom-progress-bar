@@ -152,6 +152,10 @@ class DemoTab(TabbedPanelItem):
 
     def get_callbacks(self):
         return self.callbacks
+
+    def get_comparison_sim_update_handlers(self):
+        if self.comparison_simulation_submenu:
+            return self.comparison_simulation_submenu.get_ui_update_handlers() 
 # *************************************************************
 # end: class DemoTab
 # *************************************************************
@@ -251,6 +255,8 @@ class ComparisonSimulationSubmenu(BoxLayout):
         self.on_return_click = on_return_click
         self.on_start_simulation_click = on_start_simulation_click
 
+        self.is_button_active = True
+
         self.add_widget(SubmenuHeader(
             "Demo - Comparison Simulation",
             lambda btn_instance: self.handle_submenu_return_btn_click(btn_instance),
@@ -281,8 +287,25 @@ class ComparisonSimulationSubmenu(BoxLayout):
 
 
     def handle_start_simulation_btn_click(self, button_instance):
-        if self.on_start_simulation_click and callable(self.on_start_simulation_click):
+        condition = self.on_start_simulation_click \
+            and callable(self.on_start_simulation_click) \
+            and self.is_button_active
+        if condition:
+            # self.is_button_active = False
             self.on_start_simulation_click()
+
+
+    def set_start_simulation_button_enabled(self, enabled):
+        if type(enabled) == bool:
+            self.is_button_active = enabled
+            print("self.is_button_active = {}".format(self.is_button_active))
+    
+
+    def get_ui_update_handlers(self):
+        return {
+            "set_start_simulation_button_enabled": \
+                self.set_start_simulation_button_enabled
+        }
 # *************************************************************
 # end: class ComparisonSimulationSubmenu
 # *************************************************************

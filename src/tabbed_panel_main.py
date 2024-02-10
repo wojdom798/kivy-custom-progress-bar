@@ -18,6 +18,9 @@ class TabbedPanelMain(TabbedPanel):
     # *************************************************************
     def get_demo_tab_callbacks(self):
         return self.demo_tab.get_callbacks()
+
+    def get_comparison_sim_update_handlers(self):
+        return self.demo_tab.get_comparison_sim_update_handlers()
 # *************************************************************
 # end: class TabbedPanelMain
 # *************************************************************

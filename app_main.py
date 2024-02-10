@@ -82,9 +82,9 @@ class AppMainLayout(BoxLayout):
         REFRESH_RATE_MS = 70
 
         if not self.is_comparison_simulation_active:
-            print("starting the simulation...")
             self.is_comparison_simulation_active = True
-            # TODO: deactivate the button
+            self.main_tabbed_panel.get_comparison_sim_update_handlers() \
+                ["set_start_simulation_button_enabled"](False)
 
             self.comparison_simulation_thread = threading.Thread(
                 target=self.simulate_comparisons,
@@ -105,15 +105,14 @@ class AppMainLayout(BoxLayout):
     def check_comparison_simulation_finished(self):
         while (self.comparison_simulation_thread.is_alive()):
             time.sleep(0.1) # 100 ms
-        print("comparison finished.")
         self.perform_comparison_simulation_cleanup()
 
 
     @kivy_mainthread
     def perform_comparison_simulation_cleanup(self):
-        print("cleaning up...")
         self.is_comparison_simulation_active = False
-        # TODO: activate the button
+        self.main_tabbed_panel.get_comparison_sim_update_handlers() \
+                ["set_start_simulation_button_enabled"](True)
 
 
     @kivy_mainthread

@@ -78,7 +78,8 @@ class AppMainLayout(BoxLayout):
 
 
     def run_comparison_simulation(self):
-        NUM_OF_ITEMS_TO_COMPARE = 10000
+        # NUM_OF_ITEMS_TO_COMPARE = 10000
+        NUM_OF_ITEMS_TO_COMPARE = 4000
         REFRESH_RATE_MS = 70
 
         if not self.is_comparison_simulation_active:

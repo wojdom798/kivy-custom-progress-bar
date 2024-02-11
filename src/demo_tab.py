@@ -10,6 +10,8 @@ from kivy.uix.slider import Slider
 from kivy.graphics import Rectangle
 from kivy.graphics import Color
 
+from kivy.animation import Animation
+
 from .utils import rgba_to_color
 
 
@@ -292,13 +294,31 @@ class ComparisonSimulationSubmenu(BoxLayout):
             and self.is_button_active
         if condition:
             # self.is_button_active = False
+            self.play_button_animation(button_instance)
             self.on_start_simulation_click()
+
+
+    def play_button_animation(self, button_instance):
+        # if active then play the disable animation
+        if self.is_button_active:
+            button_animation = Animation(
+                background_color=rgba_to_color((255, 10, 10, 255)),
+                duration=0.2
+            )
+            button_animation.start(button_instance)
+        else:
+            button_animation = Animation(
+                background_color=rgba_to_color((255, 255, 255, 255)),
+                duration=0.2
+            )
+            button_animation.start(button_instance)
 
 
     def set_start_simulation_button_enabled(self, enabled):
         if type(enabled) == bool:
+            self.play_button_animation(self.start_simulation_button)
             self.is_button_active = enabled
-            print("self.is_button_active = {}".format(self.is_button_active))
+            # print("self.is_button_active = {}".format(self.is_button_active))
     
 
     def get_ui_update_handlers(self):

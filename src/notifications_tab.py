@@ -4,6 +4,7 @@ from kivy.uix.anchorlayout import AnchorLayout
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.tabbedpanel import TabbedPanelItem
+from kivy.uix.scrollview import ScrollView
 from kivy.uix.button import Button
 from kivy.uix.label import Label
 from kivy.uix.widget import Widget
@@ -39,44 +40,90 @@ class NotificationsTab(TabbedPanelItem):
         # )
         # self.add_widget(self.temporary_label)
 
+        self.notifications_list = []
+
         self.main_container = BoxLayout(
             orientation="vertical",
-            size_hint=(1, 1),
-            spacing=10,
-            padding=(10, 10)
+            size_hint=(1, 1)
         )
         self.add_widget(self.main_container)
 
-        test_notification_info = Notification({
+        self.scroll_view = ScrollView(
+            size_hint=(1, 1),
+            do_scroll_y=True,
+            do_scroll_x=False
+        )
+        self.main_container.add_widget(self.scroll_view)
+
+        self.notification_container = GridLayout(
+            cols=1,
+            size_hint_y=None,
+            spacing=7
+        )
+        self.notification_container.bind(
+            minimum_height=self.notification_container.setter("height")
+        )
+        self.scroll_view.add_widget(self.notification_container)
+
+
+        self.test_notifications() # debug
+    # *************************************************************
+    # end: NotificationsTab.__init__()
+    # *************************************************************
+    def emit_notification(self, notification_data):
+        self.notifications_list.append(notification_data)
+        self.notification_container.add_widget(
+            Notification(
+                notification_data,
+                spacing=7,
+                size_hint_y=None,
+                height=70
+            )
+        )
+
+
+    def test_notifications(self):
+        self.emit_notification({
             "type": NotificationEnum.INFO,
-            "title": "Test Notification (Info)",
+            "title": "Test Notification (Info 1)",
             "message": "This is a test info notification."
         })
-        self.main_container.add_widget(test_notification_info)
 
-        test_notification_success = Notification({
+        self.emit_notification({
             "type": NotificationEnum.SUCCESS,
             "title": "Test Notification (Success)",
             "message": "This is a test success notification."
         })
-        self.main_container.add_widget(test_notification_success)
 
-        test_notification_warning = Notification({
+        self.emit_notification({
+            "type": NotificationEnum.INFO,
+            "title": "Test Notification (Info 2)",
+            "message": "This is a test info notification."
+        })
+
+        self.emit_notification({
             "type": NotificationEnum.WARNING,
             "title": "Test Notification (Warning)",
             "message": "This is a test warning notification."
         })
-        self.main_container.add_widget(test_notification_warning)
 
-        test_notification_error = Notification({
+        self.emit_notification({
+            "type": NotificationEnum.INFO,
+            "title": "Test Notification (Info 3)",
+            "message": "This is a test info notification."
+        })
+
+        self.emit_notification({
             "type": NotificationEnum.ERROR,
             "title": "Test Notification (Error)",
             "message": "This is a test error notification."
         })
-        self.main_container.add_widget(test_notification_error)
-    # *************************************************************
-    # end: NotificationsTab.__init__()
-    # *************************************************************
+
+        self.emit_notification({
+            "type": NotificationEnum.INFO,
+            "title": "Test Notification (Info 4)",
+            "message": "This is a test info notification."
+        })
 # *************************************************************
 # end: class NotificationsTab
 # *************************************************************

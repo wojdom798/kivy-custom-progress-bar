@@ -48,8 +48,15 @@ class NotificationsTab(TabbedPanelItem):
         )
         self.add_widget(self.main_container)
 
+        self.clear_notifications_button = Button(
+            text="clear notifications",
+            on_release=lambda bt_inst: self.clear_notifications(),
+            size_hint=(1, 0.1)
+        )
+        self.main_container.add_widget(self.clear_notifications_button)
+
         self.scroll_view = ScrollView(
-            size_hint=(1, 1),
+            size_hint=(1, 0.9),
             do_scroll_y=True,
             do_scroll_x=False
         )
@@ -80,6 +87,11 @@ class NotificationsTab(TabbedPanelItem):
                 height=70
             )
         )
+
+    
+    def clear_notifications(self):
+        self.notification_container.clear_widgets()
+        self.notifications_list = []
 
 
     def test_notifications(self):

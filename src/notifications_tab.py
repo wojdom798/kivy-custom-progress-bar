@@ -8,6 +8,7 @@ from kivy.uix.scrollview import ScrollView
 from kivy.uix.button import Button
 from kivy.uix.label import Label
 from kivy.uix.widget import Widget
+from kivy.uix.dropdown import DropDown
 
 from kivy.graphics import Rectangle
 from kivy.graphics import Color
@@ -28,6 +29,13 @@ class NotificationEnum(Enum):
     ERROR = 3
     INFO = 4
 
+class FilterEnum(Enum):
+    ALL = 1
+    SUCCESS = 2
+    WARNING = 3
+    ERROR = 4
+    INFO = 5
+
 
 class NotificationsTab(TabbedPanelItem):
     def __init__(self, **kwargs):
@@ -41,6 +49,7 @@ class NotificationsTab(TabbedPanelItem):
         # self.add_widget(self.temporary_label)
 
         self.notifications_list = []
+        # self.notifications_filter = FilterEnum.ALL
 
         self.main_container = BoxLayout(
             orientation="vertical",
@@ -48,12 +57,94 @@ class NotificationsTab(TabbedPanelItem):
         )
         self.add_widget(self.main_container)
 
+        self.controls_container = BoxLayout(
+            size_hint=(1, 0.1)
+        )
+        self.main_container.add_widget(self.controls_container)
+
         self.clear_notifications_button = Button(
             text="clear notifications",
             on_release=lambda bt_inst: self.clear_notifications(),
-            size_hint=(1, 0.1)
         )
-        self.main_container.add_widget(self.clear_notifications_button)
+        self.controls_container.add_widget(self.clear_notifications_button)
+
+        
+        #                         Dropdown
+        # -----------------------------------------------------------------
+        self.filter_dropdown = DropDown()
+
+        # dropdown item (all)
+        self.filter_all_selector_button = Button(
+            text="all",
+            size_hint_y=None,
+            height=40,
+            on_release=lambda btn_instance: self.handle_filter_dropdown_item_click(
+                btn_instance,
+                FilterEnum.ALL
+            )
+        )
+        self.filter_dropdown.add_widget(self.filter_all_selector_button)
+
+        # dropdown item (info)
+        self.filter_info_selector_button = Button(
+            text="info",
+            size_hint_y=None,
+            height=40,
+            on_release=lambda btn_instance: self.handle_filter_dropdown_item_click(
+                btn_instance,
+                FilterEnum.INFO
+            )
+        )
+        self.filter_dropdown.add_widget(self.filter_info_selector_button)
+
+        # dropdown item (success)
+        self.filter_success_selector_button = Button(
+            text="success",
+            size_hint_y=None,
+            height=40,
+            on_release=lambda btn_instance: self.handle_filter_dropdown_item_click(
+                btn_instance,
+                FilterEnum.SUCCESS
+            )
+        )
+        self.filter_dropdown.add_widget(self.filter_success_selector_button)
+
+        # dropdown item (warning)
+        self.filter_warning_selector_button = Button(
+            text="warning",
+            size_hint_y=None,
+            height=40,
+            on_release=lambda btn_instance: self.handle_filter_dropdown_item_click(
+                btn_instance,
+                FilterEnum.WARNING
+            )
+        )
+        self.filter_dropdown.add_widget(self.filter_warning_selector_button)
+
+        # dropdown item (error)
+        self.filter_error_selector_button = Button(
+            text="error",
+            size_hint_y=None,
+            height=40,
+            on_release=lambda btn_instance: self.handle_filter_dropdown_item_click(
+                btn_instance,
+                FilterEnum.ERROR
+            )
+        )
+        self.filter_dropdown.add_widget(self.filter_error_selector_button)
+
+        # dropdown toggle button
+        self.filter_dropdown_button = Button(
+            text="all",
+            on_release=self.handle_filter_dropdown_click
+        )
+        self.controls_container.add_widget(self.filter_dropdown_button)
+
+        self.filter_dropdown.bind(on_select=lambda instance, x: setattr(
+            self.filter_dropdown_button, "text", x
+        ))
+        #                        end: Dropdown
+        # -----------------------------------------------------------------
 
         self.scroll_view = ScrollView(
             size_hint=(1, 0.9),
@@ -79,19 +170,87 @@ class NotificationsTab(TabbedPanelItem):
     # *************************************************************
     def emit_notification(self, notification_data):
         self.notifications_list.append(notification_data)
-        self.notification_container.add_widget(
-            Notification(
-                notification_data,
-                spacing=7,
-                size_hint_y=None,
-                height=70
-            )
-        )
+        self.update_notification_container(self.notifications_list)
 
     
     def clear_notifications(self):
         self.notification_container.clear_widgets()
         self.notifications_list = []
+
+
+    def handle_filter_dropdown_click(self, button_instance):
+        self.filter_dropdown.open(button_instance)
+
+
+    def handle_filter_dropdown_item_click(self, button_instance, filter_type):
+        self.filter_dropdown.select(button_instance.text)
+        # print("selected filter: {}".format(filter_type))
+        self.update_notification_container(
+            self.notifications_list,
+            notification_filter=filter_type
+        )
+
+    
+    def update_notification_container(
+        self,
+        notification_list,
+        notification_filter=FilterEnum.ALL
+    ):
+        self.notification_container.clear_widgets()
+        if notification_filter == FilterEnum.ALL:
+            for notification in notification_list:
+                self.notification_container.add_widget(
+                    Notification(
+                        notification,
+                        spacing=7,
+                        size_hint_y=None,
+                        height=70,
+                    )
+                )
+        elif notification_filter == FilterEnum.INFO:
+            for notification in notification_list:
+                if notification["type"] == NotificationEnum.INFO:
+                    self.notification_container.add_widget(
+                        Notification(
+                            notification,
+                            spacing=7,
+                            size_hint_y=None,
+                            height=70,
+                        )
+                    )
+        elif notification_filter == FilterEnum.SUCCESS:
+            for notification in notification_list:
+                if notification["type"] == NotificationEnum.SUCCESS:
+                    self.notification_container.add_widget(
+                        Notification(
+                            notification,
+                            spacing=7,
+                            size_hint_y=None,
+                            height=70,
+                        )
+                    )
+        elif notification_filter == FilterEnum.WARNING:
+            for notification in notification_list:
+                if notification["type"] == NotificationEnum.WARNING:
+                    self.notification_container.add_widget(
+                        Notification(
+                            notification,
+                            spacing=7,
+                            size_hint_y=None,
+                            height=70,
+                        )
+                    )
+        elif notification_filter == FilterEnum.ERROR:
+            for notification in notification_list:
+                if notification["type"] == NotificationEnum.ERROR:
+                    self.notification_container.add_widget(
+                        Notification(
+                            notification,
+                            spacing=7,
+                            size_hint_y=None,
+                            height=70,
+                        )
+                    )
 
 
     def test_notifications(self):

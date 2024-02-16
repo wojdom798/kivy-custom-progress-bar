@@ -1,3 +1,4 @@
+import datetime
 from enum import Enum
 
 from kivy.uix.anchorlayout import AnchorLayout
@@ -169,7 +170,13 @@ class NotificationsTab(TabbedPanelItem):
     # end: NotificationsTab.__init__()
     # *************************************************************
     def emit_notification(self, notification_data):
-        self.notifications_list.append(notification_data)
+        now_datetime = datetime.datetime.now()
+        self.notifications_list.append({
+            "type": notification_data["type"],
+            "title": notification_data["title"],
+            "message": notification_data["message"],
+            "timestamp": now_datetime.strftime("%Y-%m-%d %H:%M:%S.%f")
+        })
         self.update_notification_container(self.notifications_list)
 
     
@@ -378,7 +385,10 @@ class Notification(GridLayout):
         self.add_widget(self.right_side_container)
 
         self.notification_title = Label(
-            text="[size=20]{}[/size]".format(notification_data["title"]),
+            text="[size=20]{}, ({})[/size]".format(
+                notification_data["title"],
+                notification_data["timestamp"]
+            ),
             markup=True
         )
         self.right_side_container.add_widget(self.notification_title)

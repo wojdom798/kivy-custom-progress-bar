@@ -50,7 +50,7 @@ class NotificationsTab(TabbedPanelItem):
         # self.add_widget(self.temporary_label)
 
         self.notifications_list = []
-        # self.notifications_filter = FilterEnum.ALL
+        self.notifications_filter = FilterEnum.ALL
 
         self.main_container = BoxLayout(
             orientation="vertical",
@@ -68,6 +68,12 @@ class NotificationsTab(TabbedPanelItem):
             on_release=lambda bt_inst: self.clear_notifications(),
         )
         self.controls_container.add_widget(self.clear_notifications_button)
+
+        self.emit_test_notifications_button = Button(
+            text="emit notifications (test)",
+            on_release=lambda bt_inst: self.test_notifications(),
+        )
+        self.controls_container.add_widget(self.emit_test_notifications_button)
 
         
         #                         Dropdown
@@ -163,9 +169,6 @@ class NotificationsTab(TabbedPanelItem):
             minimum_height=self.notification_container.setter("height")
         )
         self.scroll_view.add_widget(self.notification_container)
-
-
-        self.test_notifications() # debug
     # *************************************************************
     # end: NotificationsTab.__init__()
     # *************************************************************
@@ -177,7 +180,10 @@ class NotificationsTab(TabbedPanelItem):
             "message": notification_data["message"],
             "timestamp": now_datetime.strftime("%Y-%m-%d %H:%M:%S.%f")
         })
-        self.update_notification_container(self.notifications_list)
+        self.update_notification_container(
+            self.notifications_list,
+            notification_filter=self.notifications_filter
+        )
 
     
     def clear_notifications(self):
@@ -192,6 +198,7 @@ class NotificationsTab(TabbedPanelItem):
     def handle_filter_dropdown_item_click(self, button_instance, filter_type):
         self.filter_dropdown.select(button_instance.text)
         # print("selected filter: {}".format(filter_type))
+        self.notifications_filter = filter_type
         self.update_notification_container(
             self.notifications_list,
             notification_filter=filter_type

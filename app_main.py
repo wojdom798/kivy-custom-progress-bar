@@ -12,6 +12,7 @@ from kivy.uix.button import Button
 
 from src.progress_bar_custom import ProgressBarCustom
 from src.tabbed_panel_main import TabbedPanelMain
+from src.notifications_tab import NotificationEnum
 
 
 class AppMainLayout(BoxLayout):
@@ -87,6 +88,14 @@ class AppMainLayout(BoxLayout):
             self.main_tabbed_panel.get_comparison_sim_update_handlers() \
                 ["set_start_simulation_button_enabled"](False)
 
+            self.main_tabbed_panel.emit_notification({
+                "type": NotificationEnum.INFO,
+                "title": "Starting Comparison Simulation",
+                "message": "Number of items to compare: {}".format(
+                    NUM_OF_ITEMS_TO_COMPARE
+                )
+            })
+
             self.comparison_simulation_thread = threading.Thread(
                 target=self.simulate_comparisons,
                 args=(
@@ -114,6 +123,12 @@ class AppMainLayout(BoxLayout):
         self.is_comparison_simulation_active = False
         self.main_tabbed_panel.get_comparison_sim_update_handlers() \
                 ["set_start_simulation_button_enabled"](True)
+
+        self.main_tabbed_panel.emit_notification({
+            "type": NotificationEnum.SUCCESS,
+            "title": "Comparison Simulation Finished",
+            "message": "The simulation has been performed successfully."
+        })
 
 
     @kivy_mainthread

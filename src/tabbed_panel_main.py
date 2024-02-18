@@ -21,6 +21,9 @@ class TabbedPanelMain(TabbedPanel):
 
     def get_comparison_sim_update_handlers(self):
         return self.demo_tab.get_comparison_sim_update_handlers()
+
+    def emit_notification(self, notification_data):
+        self.notifications_tab.emit_notification(notification_data)
 # *************************************************************
 # end: class TabbedPanelMain
 # *************************************************************

@@ -52,7 +52,8 @@ class AppMainLayout(BoxLayout):
             lambda new_value: self.set_progress_bar_value(new_value)
 
         self.main_tabbed_panel.get_demo_tab_callbacks() \
-            ["start_simulation_cb"] = lambda: self.run_comparison_simulation()
+            ["start_simulation_cb"] =\
+                lambda: self.handle_run_comparison_simulation_btn_click()
 
 
         self.progress_bar_container = BoxLayout(
@@ -78,38 +79,62 @@ class AppMainLayout(BoxLayout):
         self.progress_bar_custom.set_percent_complete(new_value)
 
 
-    def run_comparison_simulation(self):
+    def handle_run_comparison_simulation_btn_click(self):
         # NUM_OF_ITEMS_TO_COMPARE = 10000
         NUM_OF_ITEMS_TO_COMPARE = 4000
         REFRESH_RATE_MS = 70
 
         if not self.is_comparison_simulation_active:
             self.is_comparison_simulation_active = True
-            self.main_tabbed_panel.get_comparison_sim_update_handlers() \
-                ["set_start_simulation_button_enabled"](False)
-
-            self.main_tabbed_panel.emit_notification({
-                "type": NotificationEnum.INFO,
-                "title": "Starting Comparison Simulation",
-                "message": "Number of items to compare: {}".format(
-                    NUM_OF_ITEMS_TO_COMPARE
-                )
-            })
 
             self.comparison_simulation_thread = threading.Thread(
-                target=self.simulate_comparisons,
-                args=(
-                    NUM_OF_ITEMS_TO_COMPARE,
-                    lambda update_data: self.update_progressbar_threaded(update_data),
-                    REFRESH_RATE_MS
-                )
+                target=self.run_comparison_simulation,
+                args=({
+                    "num_of_items": NUM_OF_ITEMS_TO_COMPARE,
+                    "progress_update_cb": lambda update_data: \
+                        self.update_progressbar_threaded(update_data),
+                    "progress_refresh_rate": REFRESH_RATE_MS
+                },)
             )
             self.comparison_simulation_thread.start()
-            
+
             sim_check_thread = threading.Thread(
                 target=self.check_comparison_simulation_finished
             )
             sim_check_thread.start()
+
+
+    def run_comparison_simulation(self, simulation_data):
+        self.main_tabbed_panel.get_comparison_sim_update_handlers() \
+            ["set_start_simulation_button_enabled"](False)
+
+        self.emit_notification_mainthread({
+            "type": NotificationEnum.INFO,
+            "title": "Starting Comparison Simulation",
+            "message": "Number of items to compare: {}".format(
+                simulation_data["num_of_items"]
+            )
+        })
+
+        try:
+            self.simulate_comparisons(
+                simulation_data["num_of_items"],
+                simulation_data["progress_update_cb"],
+                refresh_rate_ms=simulation_data["progress_refresh_rate"]
+            )
+
+            self.emit_notification_mainthread({
+                "type": NotificationEnum.SUCCESS,
+                "title": "Comparison Simulation Finished",
+                "message": "The simulation has been performed successfully."
+            })
+
+        except Exception as e:
+            self.emit_notification_mainthread({
+                "type": NotificationEnum.ERROR,
+                "title": "Comparison Simulation Error",
+                "message": "{}".format(e)
+            })
         
     
     def check_comparison_simulation_finished(self):
@@ -124,11 +149,10 @@ class AppMainLayout(BoxLayout):
         self.main_tabbed_panel.get_comparison_sim_update_handlers() \
                 ["set_start_simulation_button_enabled"](True)
 
-        self.main_tabbed_panel.emit_notification({
-            "type": NotificationEnum.SUCCESS,
-            "title": "Comparison Simulation Finished",
-            "message": "The simulation has been performed successfully."
-        })
+
+    @kivy_mainthread
+    def emit_notification_mainthread(self, notification_data):
+        self.main_tabbed_panel.emit_notification(notification_data)
 
 
     @kivy_mainthread

@@ -6,6 +6,7 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
 from kivy.uix.label import Label
 from kivy.uix.slider import Slider
+from kivy.uix.textinput import TextInput
 
 from kivy.graphics import Rectangle
 from kivy.graphics import Color
@@ -177,21 +178,36 @@ class IncreaseProgressWithButtonSubmenu(BoxLayout):
             size_hint=(1, 0.10))
         )
 
-        self.button_container = AnchorLayout(
+        self.main_container = AnchorLayout(
             anchor_x="center",
             anchor_y="center",
             size_hint=(1, 0.9)
         )
-        self.add_widget(self.button_container)
+        self.add_widget(self.main_container)
+
+        self.button_container = BoxLayout(
+            orientation="horizontal",
+            size=(250, 50),
+            size_hint=(None, None)
+        )
+        self.main_container.add_widget(self.button_container)
 
         self.increase_progress_button = Button(
             text="click to increase progress",
-            size=(190, 50),
-            size_hint=(None, None),
+            size_hint=(0.8, 1),
             on_release=lambda button_instance: \
                 self.handle_increase_progress_button_click(button_instance)
         )
         self.button_container.add_widget(self.increase_progress_button)
+
+        self.step_value_input = TextInput(
+            text="",
+            size_hint=(0.2, 1),
+            multiline=False,
+            halign="center"
+        )
+        self.button_container.add_widget(self.step_value_input)
+        self.step_value_input.bind(text=self.handle_step_value_input_change)
     # *************************************************************
     # end: IncreaseProgressWithButtonSubmenu.__init__()
     # *************************************************************
@@ -199,9 +215,14 @@ class IncreaseProgressWithButtonSubmenu(BoxLayout):
         if self.on_return_click and callable(self.on_return_click):
             self.on_return_click(button_instance)
 
+
     def handle_increase_progress_button_click(self, button_instance):
         if self.on_progress_btn_click and callable(self.on_progress_btn_click):
             self.on_progress_btn_click(button_instance)
+
+
+    def handle_step_value_input_change(self, textfield_instance, text):
+        print(text)
 # *************************************************************
 # end: class IncreaseProgressWithButtonSubmenu
 # *************************************************************

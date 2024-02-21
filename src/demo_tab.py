@@ -30,6 +30,7 @@ class DemoTab(TabbedPanelItem):
 
         self.callbacks = {
             "increase_progress_button_click_cb": None,
+            "set_button_click_step_value_cb": None,
             "progress_slider_value_change_cb": None,
             "start_simulation_cb": None,
         }
@@ -104,7 +105,8 @@ class DemoTab(TabbedPanelItem):
         self.increase_progress_with_button_submenu = IncreaseProgressWithButtonSubmenu(
             on_return_click=lambda btn_instance: self.return_from_submenu(),
             on_progress_btn_click=lambda btn_instance: \
-                self.handle_increase_progress_button_click(btn_instance)
+                self.handle_increase_progress_button_click(btn_instance),
+            on_step_value_change=self.handle_button_step_value_change
         )
         # self.main_container.add_widget(self.increase_progress_with_button_submenu)
         
@@ -141,6 +143,11 @@ class DemoTab(TabbedPanelItem):
     def handle_increase_progress_button_click(self, button_instance):
         if "increase_progress_button_click_cb" in self.callbacks:
             self.callbacks["increase_progress_button_click_cb"]()
+    
+
+    def handle_button_step_value_change(self, new_value):
+        if "set_button_click_step_value_cb" in self.callbacks:
+            self.callbacks["set_button_click_step_value_cb"](new_value)
 
     
     def handle_slider_value_change(self, instance, value):
@@ -165,12 +172,19 @@ class DemoTab(TabbedPanelItem):
 
 
 class IncreaseProgressWithButtonSubmenu(BoxLayout):
-    def __init__(self, on_return_click=None, on_progress_btn_click=None, **kwargs):
+    def __init__(
+        self,
+        on_return_click=None,
+        on_progress_btn_click=None,
+        on_step_value_change=None,
+        **kwargs
+    ):
         super(IncreaseProgressWithButtonSubmenu, self).__init__(**kwargs)
         self.orientation = "vertical"
 
         self.on_return_click = on_return_click
         self.on_progress_btn_click = on_progress_btn_click
+        self.on_step_value_change = on_step_value_change
 
         self.add_widget(SubmenuHeader(
             "Demo - Increase Progress With Button",
@@ -222,7 +236,15 @@ class IncreaseProgressWithButtonSubmenu(BoxLayout):
 
 
     def handle_step_value_input_change(self, textfield_instance, text):
-        print(text)
+        if self.on_step_value_change and callable(self.on_step_value_change):
+            converted_value = None
+            try:
+                converted_value = int(text)
+                if converted_value < 1:
+                    converted_value = None
+            except Exception as e:
+                converted_value = None
+            self.on_step_value_change(converted_value)
 # *************************************************************
 # end: class IncreaseProgressWithButtonSubmenu
 # *************************************************************

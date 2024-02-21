@@ -14,6 +14,7 @@ from src.progress_bar_custom import ProgressBarCustom
 from src.tabbed_panel_main import TabbedPanelMain
 from src.notifications_tab import NotificationEnum
 
+DEFAULT_STEP_VALUE = 4
 
 class AppMainLayout(BoxLayout):
     def __init__(self, **kwargs):
@@ -21,6 +22,7 @@ class AppMainLayout(BoxLayout):
         self.orientation = "vertical"
 
         self.button_click_count = 0
+        self.button_click_step = DEFAULT_STEP_VALUE
 
         self.comparison_simulation_thread = None
         self.is_comparison_simulation_active = False
@@ -48,6 +50,10 @@ class AppMainLayout(BoxLayout):
             lambda: self.handle_test_button_click(None)
 
         self.main_tabbed_panel.get_demo_tab_callbacks() \
+            ["set_button_click_step_value_cb"] = \
+            lambda new_value: self.update_button_click_step_value(new_value)
+
+        self.main_tabbed_panel.get_demo_tab_callbacks() \
             ["progress_slider_value_change_cb"] = \
             lambda new_value: self.set_progress_bar_value(new_value)
 
@@ -69,10 +75,18 @@ class AppMainLayout(BoxLayout):
     # *************************************************************
     def handle_test_button_click(self, button_instance):
         self.button_click_count += 1
-        if self.button_click_count > 4:
+        if self.button_click_count > self.button_click_step:
             self.button_click_count = 0
-        self.progress_bar_custom.set_percent_complete(self.button_click_count * 25)
+        self.progress_bar_custom.set_percent_complete(
+            self.button_click_count * (100 / self.button_click_step)
+        )
         # print("The test button was clicked {} times".format(self.button_click_count))
+
+
+    def update_button_click_step_value(self, new_value):
+        if new_value:
+            self.button_click_count = 0
+            self.button_click_step = new_value
 
 
     def set_progress_bar_value(self, new_value):

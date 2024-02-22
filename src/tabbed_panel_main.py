@@ -24,6 +24,9 @@ class TabbedPanelMain(TabbedPanel):
 
     def emit_notification(self, notification_data):
         self.notifications_tab.emit_notification(notification_data)
+
+    def set_button_demo_default_step_value(self, value):
+        self.demo_tab.set_button_demo_default_step_value(value)
 # *************************************************************
 # end: class TabbedPanelMain
 # *************************************************************

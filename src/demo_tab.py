@@ -3,6 +3,7 @@ from enum import Enum
 from kivy.uix.tabbedpanel import TabbedPanelItem
 from kivy.uix.anchorlayout import AnchorLayout
 from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.gridlayout import GridLayout
 from kivy.uix.button import Button
 from kivy.uix.label import Label
 from kivy.uix.slider import Slider
@@ -146,7 +147,10 @@ class DemoTab(TabbedPanelItem):
     
 
     def handle_button_step_value_change(self, new_value):
-        if "set_button_click_step_value_cb" in self.callbacks:
+        condition = "set_button_click_step_value_cb" in self.callbacks and \
+            self.callbacks["set_button_click_step_value_cb"] and \
+            callable(self.callbacks["set_button_click_step_value_cb"])
+        if condition:
             self.callbacks["set_button_click_step_value_cb"](new_value)
 
     
@@ -158,6 +162,10 @@ class DemoTab(TabbedPanelItem):
     def handle_start_simulation(self):
         if "start_simulation_cb" in self.callbacks:
             self.callbacks["start_simulation_cb"]()
+
+
+    def set_button_demo_default_step_value(self, value):
+        self.increase_progress_with_button_submenu.set_default_step_value(value)
 
 
     def get_callbacks(self):
@@ -200,19 +208,31 @@ class IncreaseProgressWithButtonSubmenu(BoxLayout):
         self.add_widget(self.main_container)
 
         self.button_container = BoxLayout(
-            orientation="horizontal",
-            size=(250, 50),
+            orientation="vertical",
+            size=(250, 100),
             size_hint=(None, None)
         )
         self.main_container.add_widget(self.button_container)
 
         self.increase_progress_button = Button(
             text="click to increase progress",
-            size_hint=(0.8, 1),
+            size_hint=(1, 1),
             on_release=lambda button_instance: \
                 self.handle_increase_progress_button_click(button_instance)
         )
         self.button_container.add_widget(self.increase_progress_button)
+
+        step_value_container = GridLayout(
+            cols=2,
+            size_hint=(1, 1)
+        )
+        self.button_container.add_widget(step_value_container)
+
+        step_value_label = Label(
+            text="step value",
+            size_hint=(0.8, 1)
+        )
+        step_value_container.add_widget(step_value_label)
 
         self.step_value_input = TextInput(
             text="",
@@ -220,7 +240,7 @@ class IncreaseProgressWithButtonSubmenu(BoxLayout):
             multiline=False,
             halign="center"
         )
-        self.button_container.add_widget(self.step_value_input)
+        step_value_container.add_widget(self.step_value_input)
         self.step_value_input.bind(text=self.handle_step_value_input_change)
     # *************************************************************
     # end: IncreaseProgressWithButtonSubmenu.__init__()
@@ -245,6 +265,10 @@ class IncreaseProgressWithButtonSubmenu(BoxLayout):
             except Exception as e:
                 converted_value = None
             self.on_step_value_change(converted_value)
+
+
+    def set_default_step_value(self, value):
+        self.step_value_input.text = str(value)
 # *************************************************************
 # end: class IncreaseProgressWithButtonSubmenu
 # *************************************************************

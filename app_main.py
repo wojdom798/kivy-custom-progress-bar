@@ -45,6 +45,8 @@ class AppMainLayout(BoxLayout):
         self.main_tabbed_panel = TabbedPanelMain(size_hint=(1, 0.9))
         self.add_widget(self.main_tabbed_panel)
 
+        self.main_tabbed_panel.set_button_demo_default_step_value(DEFAULT_STEP_VALUE)
+
         self.main_tabbed_panel.get_demo_tab_callbacks() \
             ["increase_progress_button_click_cb"] = \
             lambda: self.handle_test_button_click(None)

@@ -7,9 +7,6 @@ from kivy.core.window import Window as KivyWindow
 
 from kivy.uix.boxlayout import BoxLayout
 
-from kivy.uix.label import Label
-from kivy.uix.button import Button
-
 from src.progress_bar_custom import ProgressBarCustom
 from src.tabbed_panel_main import TabbedPanelMain
 from src.notifications_tab import NotificationEnum
@@ -27,21 +24,6 @@ class AppMainLayout(BoxLayout):
         self.comparison_simulation_thread = None
         self.is_comparison_simulation_active = False
 
-        self.label = Label(
-            text="AppMainLayout",
-            size_hint=(1, 0.33)
-        )
-        # self.add_widget(self.label)
-
-        self.test_button = Button(
-            # text="test button",
-            text="click to increase progress",
-            size_hint=(1, 0.33),
-            on_release=lambda button_instance: \
-                self.handle_test_button_click(button_instance)
-        )
-        # self.add_widget(self.test_button)
-
         self.main_tabbed_panel = TabbedPanelMain(size_hint=(1, 0.9))
         self.add_widget(self.main_tabbed_panel)
 
@@ -49,7 +31,7 @@ class AppMainLayout(BoxLayout):
 
         self.main_tabbed_panel.get_demo_tab_callbacks() \
             ["increase_progress_button_click_cb"] = \
-            lambda: self.handle_test_button_click(None)
+            lambda: self.handle_increase_progress_button_click()
 
         self.main_tabbed_panel.get_demo_tab_callbacks() \
             ["set_button_click_step_value_cb"] = \
@@ -71,11 +53,10 @@ class AppMainLayout(BoxLayout):
 
         self.progress_bar_custom = ProgressBarCustom(size_hint=(1, 1))
         self.progress_bar_container.add_widget(self.progress_bar_custom)
-        # self.progress_bar_custom.set_percent_complete(70)
     # *************************************************************
     # end: AppMainLayout.__init__()
     # *************************************************************
-    def handle_test_button_click(self, button_instance):
+    def handle_increase_progress_button_click(self):
         self.button_click_count += 1
         if self.button_click_count > self.button_click_step:
             self.button_click_count = 0

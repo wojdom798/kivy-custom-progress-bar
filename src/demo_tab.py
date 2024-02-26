@@ -332,17 +332,46 @@ class ComparisonSimulationSubmenu(BoxLayout):
             size_hint=(1, 0.10))
         )
 
-        self.main_container = AnchorLayout(
+        self.centering_container = AnchorLayout(
             anchor_x="center",
             anchor_y="center",
             size_hint=(1, 0.9)
         )
-        self.add_widget(self.main_container)
+        self.add_widget(self.centering_container)
+
+        self.main_container = BoxLayout(
+            orientation="vertical",
+            size=(400, 110),
+            size_hint=(None, None),
+            spacing=10
+        )
+        self.centering_container.add_widget(self.main_container)
+
+        num_of_comparisons_container = GridLayout(
+            cols=2,
+            size_hint=(1, 1)
+        )
+        self.main_container.add_widget(num_of_comparisons_container)
+
+        num_of_comparisons_label = Label(
+            text="number of comparisons",
+            size_hint=(0.8, 1)
+        )
+        num_of_comparisons_container.add_widget(num_of_comparisons_label)
+
+        self.num_of_comparisons_input = TextInput(
+            text="",
+            size_hint=(0.2, 1),
+            multiline=False,
+            halign="center"
+        )
+        num_of_comparisons_container.add_widget(self.num_of_comparisons_input)
+        self.num_of_comparisons_input.bind(
+            text=self.handle_num_of_comparisons_input_change
+        )
 
         self.start_simulation_button = Button(
             text="start simulation",
-            size=(400, 50),
-            size_hint=(None, None),
             on_release=lambda btn_instance: \
                 self.handle_start_simulation_btn_click(btn_instance)
         )
@@ -353,6 +382,10 @@ class ComparisonSimulationSubmenu(BoxLayout):
     def handle_submenu_return_btn_click(self, button_instance):
         if self.on_return_click and callable(self.on_return_click):
             self.on_return_click(button_instance)
+
+    
+    def handle_num_of_comparisons_input_change(self, textfield_instance, text):
+        print(text)
 
 
     def handle_start_simulation_btn_click(self, button_instance):

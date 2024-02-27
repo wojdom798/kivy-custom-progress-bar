@@ -12,6 +12,7 @@ from src.tabbed_panel_main import TabbedPanelMain
 from src.notifications_tab import NotificationEnum
 
 DEFAULT_STEP_VALUE = 4
+DEFAULT_NUM_OF_ITEMS_TO_COMPARE = 5000
 
 class AppMainLayout(BoxLayout):
     def __init__(self, **kwargs):
@@ -20,6 +21,7 @@ class AppMainLayout(BoxLayout):
 
         self.button_click_count = 0
         self.button_click_step = DEFAULT_STEP_VALUE
+        self.num_of_items_to_compare = DEFAULT_NUM_OF_ITEMS_TO_COMPARE
 
         self.comparison_simulation_thread = None
         self.is_comparison_simulation_active = False
@@ -44,6 +46,10 @@ class AppMainLayout(BoxLayout):
         self.main_tabbed_panel.get_demo_tab_callbacks() \
             ["start_simulation_cb"] =\
                 lambda: self.handle_run_comparison_simulation_btn_click()
+
+        self.main_tabbed_panel.get_demo_tab_callbacks() \
+            ["set_simulation_num_of_items_cb"] = \
+            lambda new_value: self.update_button_click_simulation_num_of_items(new_value)
 
 
         self.progress_bar_container = BoxLayout(
@@ -72,13 +78,17 @@ class AppMainLayout(BoxLayout):
             self.button_click_step = new_value
 
 
+    def update_button_click_simulation_num_of_items(self, new_value):
+        if new_value:
+            self.num_of_items_to_compare = 0
+            self.num_of_items_to_compare = new_value
+
+
     def set_progress_bar_value(self, new_value):
         self.progress_bar_custom.set_percent_complete(new_value)
 
 
     def handle_run_comparison_simulation_btn_click(self):
-        # NUM_OF_ITEMS_TO_COMPARE = 10000
-        NUM_OF_ITEMS_TO_COMPARE = 4000
         REFRESH_RATE_MS = 70
 
         if not self.is_comparison_simulation_active:
@@ -87,7 +97,7 @@ class AppMainLayout(BoxLayout):
             self.comparison_simulation_thread = threading.Thread(
                 target=self.run_comparison_simulation,
                 args=({
-                    "num_of_items": NUM_OF_ITEMS_TO_COMPARE,
+                    "num_of_items": self.num_of_items_to_compare,
                     "progress_update_cb": lambda update_data: \
                         self.update_progressbar_threaded(update_data),
                     "progress_refresh_rate": REFRESH_RATE_MS

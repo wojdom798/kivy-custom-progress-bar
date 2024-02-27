@@ -34,6 +34,7 @@ class DemoTab(TabbedPanelItem):
             "set_button_click_step_value_cb": None,
             "progress_slider_value_change_cb": None,
             "start_simulation_cb": None,
+            "set_simulation_num_of_items_cb": None,
         }
 
         # self.main_container = AnchorLayout(
@@ -119,7 +120,9 @@ class DemoTab(TabbedPanelItem):
         
         self.comparison_simulation_submenu = ComparisonSimulationSubmenu(
             on_return_click=lambda btn_instance: self.return_from_submenu(),
-            on_start_simulation_click=self.handle_start_simulation
+            on_start_simulation_click=self.handle_start_simulation,
+            on_num_of_items_change=lambda new_value: \
+                self.handle_simulation_num_of_items_change(new_value)
         )
     # *************************************************************
     # end: DemoTab.__init__()
@@ -162,6 +165,14 @@ class DemoTab(TabbedPanelItem):
     def handle_start_simulation(self):
         if "start_simulation_cb" in self.callbacks:
             self.callbacks["start_simulation_cb"]()
+
+    
+    def handle_simulation_num_of_items_change(self, new_value):
+        condition = "set_simulation_num_of_items_cb" in self.callbacks and \
+            self.callbacks["set_simulation_num_of_items_cb"] and \
+            callable(self.callbacks["set_simulation_num_of_items_cb"])
+        if condition:
+            self.callbacks["set_simulation_num_of_items_cb"](new_value)
 
 
     def set_button_demo_default_step_value(self, value):
@@ -317,12 +328,19 @@ class IncreaseProgressWithSliderSubmenu(BoxLayout):
 
 
 class ComparisonSimulationSubmenu(BoxLayout):
-    def __init__(self, on_return_click=None, on_start_simulation_click=None, **kwargs):
+    def __init__(
+        self,
+        on_return_click=None,
+        on_start_simulation_click=None,
+        on_num_of_items_change=None,
+        **kwargs
+    ):
         super(ComparisonSimulationSubmenu, self).__init__(**kwargs)
         self.orientation = "vertical"
 
         self.on_return_click = on_return_click
         self.on_start_simulation_click = on_start_simulation_click
+        self.on_num_of_items_change = on_num_of_items_change
 
         self.is_button_active = True
 
@@ -385,7 +403,15 @@ class ComparisonSimulationSubmenu(BoxLayout):
 
     
     def handle_num_of_comparisons_input_change(self, textfield_instance, text):
-        print(text)
+        if self.on_num_of_items_change and callable(self.on_num_of_items_change):
+            converted_value = None
+            try:
+                converted_value = int(text)
+                if converted_value < 1:
+                    converted_value = None
+            except Exception as e:
+                converted_value = None
+            self.on_num_of_items_change(converted_value)
 
 
     def handle_start_simulation_btn_click(self, button_instance):

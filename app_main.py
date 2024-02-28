@@ -25,6 +25,9 @@ class AppMainLayout(BoxLayout):
 
         self.comparison_simulation_thread = None
         self.is_comparison_simulation_active = False
+        self.comparison_simulation_abort_status = {
+            "should_abort": False
+        }
 
         self.main_tabbed_panel = TabbedPanelMain(size_hint=(1, 0.9))
         self.add_widget(self.main_tabbed_panel)
@@ -51,6 +54,10 @@ class AppMainLayout(BoxLayout):
             ["set_simulation_num_of_items_cb"] = \
             lambda new_value: self.update_button_click_simulation_num_of_items(new_value)
 
+        self.main_tabbed_panel.get_demo_tab_callbacks() \
+            ["abort_simulation_cb"] =\
+                lambda: self.handle_abort_comparison_simulation_btn_click()
+
 
         self.progress_bar_container = BoxLayout(
             size_hint=(1, 0.1)
@@ -62,6 +69,10 @@ class AppMainLayout(BoxLayout):
     # *************************************************************
     # end: AppMainLayout.__init__()
     # *************************************************************
+    def handle_abort_comparison_simulation_btn_click(self):
+        self.comparison_simulation_abort_status["should_abort"] = True
+
+
     def handle_increase_progress_button_click(self):
         self.button_click_count += 1
         if self.button_click_count > self.button_click_step:
@@ -93,6 +104,7 @@ class AppMainLayout(BoxLayout):
 
         if not self.is_comparison_simulation_active:
             self.is_comparison_simulation_active = True
+            self.comparison_simulation_abort_status["should_abort"] = False
 
             self.comparison_simulation_thread = threading.Thread(
                 target=self.run_comparison_simulation,
@@ -127,7 +139,8 @@ class AppMainLayout(BoxLayout):
             self.simulate_comparisons(
                 simulation_data["num_of_items"],
                 simulation_data["progress_update_cb"],
-                refresh_rate_ms=simulation_data["progress_refresh_rate"]
+                refresh_rate_ms=simulation_data["progress_refresh_rate"],
+                abort_status_dict=self.comparison_simulation_abort_status
             )
 
             self.emit_notification_mainthread({
@@ -169,7 +182,13 @@ class AppMainLayout(BoxLayout):
         self.progress_bar_custom.set_percent_complete(percent_complete)
 
 
-    def simulate_comparisons(self, num_of_items, on_progress_update, refresh_rate_ms=120):
+    def simulate_comparisons(
+        self,
+        num_of_items,
+        on_progress_update,
+        refresh_rate_ms=120,
+        abort_status_dict={ "should_abort": False }
+    ):
         if not (type(num_of_items) == int):
             raise TypeError("\'num_of_items\' must be an integer.")
 
@@ -193,6 +212,8 @@ class AppMainLayout(BoxLayout):
         previous_update_timestamp = time.time() * 1000 # milliseconds
         for i in range(0, num_of_items):
             for j in range(i+1, num_of_items):
+                if abort_status_dict["should_abort"]:
+                    break
                 current_progress += 1
                 timestamp_now = time.time() * 1000 # milliseconds
                 if timestamp_now - previous_update_timestamp >= refresh_rate_ms:
@@ -201,6 +222,8 @@ class AppMainLayout(BoxLayout):
                         "current_progress": current_progress,
                         "total_progress": total_progress
                     })
+            if abort_status_dict["should_abort"]:
+                break
         on_progress_update({
             "current_progress": current_progress,
             "total_progress": total_progress

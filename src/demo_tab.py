@@ -35,6 +35,7 @@ class DemoTab(TabbedPanelItem):
             "progress_slider_value_change_cb": None,
             "start_simulation_cb": None,
             "set_simulation_num_of_items_cb": None,
+            "abort_simulation_cb": None,
         }
 
         # self.main_container = AnchorLayout(
@@ -122,7 +123,8 @@ class DemoTab(TabbedPanelItem):
             on_return_click=lambda btn_instance: self.return_from_submenu(),
             on_start_simulation_click=self.handle_start_simulation,
             on_num_of_items_change=lambda new_value: \
-                self.handle_simulation_num_of_items_change(new_value)
+                self.handle_simulation_num_of_items_change(new_value),
+            on_abort_simulation_click=lambda: self.handle_abort_simulation(),
         )
     # *************************************************************
     # end: DemoTab.__init__()
@@ -173,6 +175,14 @@ class DemoTab(TabbedPanelItem):
             callable(self.callbacks["set_simulation_num_of_items_cb"])
         if condition:
             self.callbacks["set_simulation_num_of_items_cb"](new_value)
+
+    
+    def handle_abort_simulation(self):
+        condition = "abort_simulation_cb" in self.callbacks and \
+            self.callbacks["abort_simulation_cb"] and \
+            callable(self.callbacks["abort_simulation_cb"])
+        if condition:
+            self.callbacks["abort_simulation_cb"]()
 
 
     def set_button_demo_default_step_value(self, value):
@@ -333,6 +343,7 @@ class ComparisonSimulationSubmenu(BoxLayout):
         on_return_click=None,
         on_start_simulation_click=None,
         on_num_of_items_change=None,
+        on_abort_simulation_click=None,
         **kwargs
     ):
         super(ComparisonSimulationSubmenu, self).__init__(**kwargs)
@@ -341,6 +352,7 @@ class ComparisonSimulationSubmenu(BoxLayout):
         self.on_return_click = on_return_click
         self.on_start_simulation_click = on_start_simulation_click
         self.on_num_of_items_change = on_num_of_items_change
+        self.on_abort_simulation_click = on_abort_simulation_click
 
         self.is_button_active = True
 
@@ -359,7 +371,7 @@ class ComparisonSimulationSubmenu(BoxLayout):
 
         self.main_container = BoxLayout(
             orientation="vertical",
-            size=(400, 110),
+            size=(400, 150),
             size_hint=(None, None),
             spacing=10
         )
@@ -394,6 +406,13 @@ class ComparisonSimulationSubmenu(BoxLayout):
                 self.handle_start_simulation_btn_click(btn_instance)
         )
         self.main_container.add_widget(self.start_simulation_button)
+
+        self.abort_simulation_button = Button(
+            text="abort simulation",
+            on_release=lambda btn_instance: \
+                self.handle_abort_simulation_btn_click(btn_instance)
+        )
+        self.main_container.add_widget(self.abort_simulation_button)
     # *************************************************************
     # end: ComparisonSimulationSubmenu.__init__()
     # *************************************************************
@@ -422,6 +441,14 @@ class ComparisonSimulationSubmenu(BoxLayout):
             # self.is_button_active = False
             self.play_button_animation(button_instance)
             self.on_start_simulation_click()
+
+
+    def handle_abort_simulation_btn_click(self, button_instance):
+        condition = self.on_abort_simulation_click \
+            and callable(self.on_abort_simulation_click) \
+            and not self.is_button_active
+        if condition:
+            self.on_abort_simulation_click()
 
 
     def play_button_animation(self, button_instance):
